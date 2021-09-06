@@ -13,30 +13,34 @@ def downward_closure(cliques):
         ans.update(powerset(proj))
     return list(sorted(ans, key=len))
 
-BINS = {
-    "fare": np.r_[-1, np.arange(0, 100, step=10), 9900],
-    "tips": np.r_[-1, np.arange(0, 100, step=10), 407],
-    "trip_total": np.r_[-1, np.arange(0, 100, step=10), 9900],
-    "trip_seconds": np.r_[-1, np.arange(0, 2000, step=200), 86400],
-    "trip_miles": np.r_[-1, np.arange(0, 100, step=10), 1428] }
-
 def discretize(df, schema, clip=None):
+
     weights = None
     if clip is not None:
-        # each individual now only contributes "clip" records
-        # achieved by reweighting records, rather than resampling them
-        weights = df.taxi_id.value_counts()
-        weights = np.minimum(clip/weights, 1.0)
-        weights = np.array(df.taxi_id.map(weights).values)
+        # If clipping, the schema must contain a column with a 'kind' of 'id'
+        id_col = next((k for k in schema if schema[k]['kind'] == 'id'), None)
+        if not id_col:
+            print("Can't clip; no column in the schema is marked with a kind of 'id'.")
+        else:
+            # each individual now only contributes "clip" records
+            # achieved by reweighting records, rather than resampling them
+            weights = df[id_col].value_counts()
+            weights = np.minimum(clip/weights, 1.0)
+            weights = np.array(df[id_col].map(weights).values)
 
     new = df.copy()
     domain = { }
     for col in schema:
         info = schema[col]
-        #print(col)
-        if col in BINS:
-            new[col] = pd.cut(df[col], BINS[col], right=False).cat.codes
-            domain[col] = len(BINS[col]) - 1
+        if 'bins' in info:
+            # Things that should be binned are marked in the schema with
+            # the number of bins into which to bin them; they will also
+            # have min and max values.
+            bin_info = np.r_[np.linspace(info['min'], info['max'], num=info['bins'],
+                    endpoint=False).astype(info['dtype']), info['max']]
+
+            new[col] = pd.cut(df[col], bin_info, right=False).cat.codes
+            domain[col] = len(bin_info) - 1
         elif 'values' in info:
             new[col] = df[col].astype(pd.CategoricalDtype(info['values'])).cat.codes
             domain[col] = len(info['values'])
@@ -53,9 +57,14 @@ def undo_discretize(dataset, schema):
 
     for col in dataset.domain:
         info = schema[col]
-        if col in BINS:
-            low = BINS[col][:-1]; 
-            high = BINS[col][1:]
+        if 'bins' in info:
+            # Things that should be binned are marked in the schema with
+            # the number of bins into which to bin them; they will also
+            # have min and max values.
+            bin_info = np.r_[np.linspace(info['min'], info['max'], num=info['bins'],
+                    endpoint=False).astype(info['dtype']), info['max']]
+            low = bin_info[:-1];
+            high = bin_info[1:]
             low[0] = low[1]-2
             high[-1] = high[-2]+2
             mid = (low + high) / 2
@@ -114,4 +123,3 @@ def score(real, synth):
     breakdown2 /= len(pairs)
 
     return nist_score, pd.Series(breakdown), (2.0 - breakdown2[idx]) / 2.0
-
