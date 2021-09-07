@@ -13,20 +13,7 @@ def downward_closure(cliques):
         ans.update(powerset(proj))
     return list(sorted(ans, key=len))
 
-def discretize(df, schema, clip=None):
-
-    weights = None
-    if clip is not None:
-        # If clipping, the schema must contain a column with a 'kind' of 'id'
-        id_col = next((k for k in schema if schema[k]['kind'] == 'id'), None)
-        if not id_col:
-            print("Can't clip; no column in the schema is marked with a kind of 'id'.")
-        else:
-            # each individual now only contributes "clip" records
-            # achieved by reweighting records, rather than resampling them
-            weights = df[id_col].value_counts()
-            weights = np.minimum(clip/weights, 1.0)
-            weights = np.array(df[id_col].map(weights).values)
+def discretize(df, schema):
 
     new = df.copy()
     domain = { }
@@ -49,7 +36,7 @@ def discretize(df, schema, clip=None):
             domain[col] = info['max'] - info['min'] + 1
 
     domain = Domain.fromdict(domain)
-    return Dataset(new, domain, weights)
+    return Dataset(new, domain, None)
 
 def undo_discretize(dataset, schema):
     df = dataset.df
@@ -83,43 +70,3 @@ def undo_discretize(dataset, schema):
     dtypes = { col : schema[col]['dtype'] for col in schema }
 
     return new.astype(dtypes)
-
-
-def score(real, synth):
-    # Replicate the NIST scoring metric
-    # Calculates score for *every* 2-way marginal instead of a sample of them
-    # performs scoring using the mbi.Dataset representation, which is different from raw data format
-    # scores should match exactly 
-    # to score raw dataset, call score(discretize(real, schema), discretize(synth, schema))
-    assert real.domain == synth.domain
-    dom = real.domain
-    proj = ('pickup_community_area','shift')
-    newdom = dom.project(dom.invert(proj))
-    keys = dom.project(proj)
-    pairs = list(itertools.combinations(newdom.attrs, 2))
-
-    idx = np.argsort(real.project('pickup_community_area').datavector())
-
-    overall = 0
-    breakdown = {}
-    breakdown2 = np.zeros(dom.size('pickup_community_area'))
-
-    for pair in pairs:
-        #print(pair)
-        proj = ('pickup_community_area','shift') + pair
-        X = real.project(proj).datavector(flatten=False)
-        Y = synth.project(proj).datavector(flatten=False)
-        X /= X.sum(axis=(2,3), keepdims=True)
-        Y /= Y.sum(axis=(2,3), keepdims=True)
-
-        err = np.nan_to_num( np.abs(X-Y).sum(axis=(2,3)), nan=2.0)
-        breakdown[pair] = err.mean()
-        breakdown2 += err.mean(axis=1)
-        overall += err.mean()
-
-    score = overall / len(pairs)
-
-    nist_score = ((2.0 - score) / 2.0) * 1_000
-    breakdown2 /= len(pairs)
-
-    return nist_score, pd.Series(breakdown), (2.0 - breakdown2[idx]) / 2.0
