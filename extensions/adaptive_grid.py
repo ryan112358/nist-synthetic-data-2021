@@ -30,8 +30,8 @@ def powerset(iterable):
 
 
 def downward_closure(cliques):
-    """Returns the 'downward closure' of a list of cliques. The 'downward closure' 
-    is the union of powersets of each individual clique in a list. Elements within 
+    """Returns the 'downward closure' of a list of cliques. The 'downward closure'
+    is the union of powersets of each individual clique in a list. Elements within
     each clique are sorted, but the list of cliques is not.
 
     Args:
@@ -118,7 +118,7 @@ def get_permutation_matrix(cl1, cl2, domain):
 
 
 def get_aggregate(cl, matrices, domain):
-    """ Returns additional measurement matrices by taking the Kronecker 
+    """Returns additional measurement matrices by taking the Kronecker
     product between Identity and previous measurements.
 
     Args:
@@ -137,7 +137,7 @@ def get_aggregate(cl, matrices, domain):
     for c in children:
         coef = 1.0 / np.sqrt(len(children))
         a = tuple(set(cl) - set(c))
-        cl2 = a + c 
+        cl2 = a + c
         Qc = matrices[c]
         P = get_permutation_matrix(cl, cl2, domain)
         T = np.ones(domain.size(a))
@@ -147,9 +147,9 @@ def get_aggregate(cl, matrices, domain):
 
 
 def get_identity(cl, post_plausibility, domain):
-    """ Determine which cells in the cl marginal *could* have a count above
+    """Determine which cells in the cl marginal *could* have a count above
     threshold based on previous measurements.
-    
+
     Args:
         cl (iterable): A clique marginal
         post_plausibility (dict): Dictionary of previously taken measurements.
@@ -188,7 +188,7 @@ def exponential_mechanism(q, eps, sensitivity, prng=np.random, monotonic=False):
             otherwise.
 
     Returns:
-        list: indices of chosen items
+        A list containing indices of chosen items.
     """
     if eps == np.inf:
         eps = np.finfo(np.float64).max
@@ -213,7 +213,7 @@ def select(data, model, rho, targets=[]):
             is ``[]``.
 
     Returns:
-        list: List of additional measurements selected by the algorithm.
+        List of additional measurements selected by the algorithm.
     """
     weights = {}
     candidates = list(itertools.combinations(data.domain.invert(targets), 2))
@@ -239,7 +239,7 @@ def select(data, model, rho, targets=[]):
     return [e + tuple(targets) for e in T.edges]
 
 
-def adagrid(data, epsilon, delta, threshold, targets=[], iters=2500):
+def adagrid(data, epsilon, delta, threshold, targets=[], split=None, **mbi_args):
     """Implements the Adagrid mechanism used in Sprint 3 of NIST 2021
     Competition by Team Minutemen.
 
@@ -253,13 +253,26 @@ def adagrid(data, epsilon, delta, threshold, targets=[], iters=2500):
         targets (iterable, optional): List of target columns. Default is
             ``[]``.
         iters (int): Number of iterations for Mirror Descent algorithm to run.
+        split_strategy ([tuple]): List of tuples, each containing the
+            (`epsilon`,`delta`) allocated to each step of the algorithm.
+        mbi_args (kwargs): Args to pass to mbi.FactoredInference. Please refer
+            to the comments within this class to determine which parameters to pass.
 
     Returns:
-        mbi.Dataset: Dataset object holding synthetic dataset satisfying 
+        mbi.Dataset: Dataset object holding synthetic dataset satisfying
             (epsilon, delta) DP
     """
     rho = cdp_rho(epsilon, delta)
-    rho_per_step = rho / 3
+    if not split_strategy:
+        rho_step_1 = rho_step_2 = rho_step_3 = rho / 3
+    else:
+        eps, d = map(lambda i, j, k: i + j + k, *split)
+        assert eps <= epsilon, "Requested epsilon exceeds budget"
+        assert d <= delta, "Requested delta exceeds budget"
+        rho_step_1 = cdp_rho(*split[0])
+        rho_step_2 = cdp_rho(*split[1])
+        rho_step_3 = cdp_rho(*split[2])
+
     domain = data.domain
     measurements = []
     post_plausibility = {}
@@ -267,7 +280,7 @@ def adagrid(data, epsilon, delta, threshold, targets=[], iters=2500):
 
     step1_outer = [(a,) + tuple(targets) for a in domain if a not in targets]
     step1_all = downward_closure(step1_outer)
-    step1_sigma = np.sqrt(0.5 / rho_per_step) * np.sqrt(len(step1_all))
+    step1_sigma = np.sqrt(0.5 / rho_step_1) * np.sqrt(len(step1_all))
 
     # Step 1: Measure all 1-way marginals involving target(s)
     for k in range(1, len(targets) + 2):
@@ -303,14 +316,14 @@ def adagrid(data, epsilon, delta, threshold, targets=[], iters=2500):
             matrices[cl] = Q
             measurements.append((Q, y, 1.0, cl))
 
-    engine = FactoredInference(domain, log=True, iters=iters, warm_start=True)
+    engine = FactoredInference(domain, log=True, **mbi_args)
     engine.estimate(measurements)
 
     # Step 2: select more marginals using an MST-style approach
-    step2_queries = select(data, engine.model, rho_per_step, targets)
+    step2_queries = select(data, engine.model, rho_step_2, targets)
 
     # step 3: measure those marginals
-    step3_sigma = np.sqrt(len(step2_queries)) * np.sqrt(0.5 / rho_per_step)
+    step3_sigma = np.sqrt(len(step2_queries)) * np.sqrt(0.5 / rho_step_3)
     for cl in step2_queries:
         I = sparse.eye(domain.size(cl))
         Q1 = get_identity(
@@ -344,10 +357,22 @@ def adagrid(data, epsilon, delta, threshold, targets=[], iters=2500):
 if __name__ == "__main__":
     # run doctests
     import doctest
-    doctest.testmod()    
+
+    doctest.testmod()
 
     df = pd.read_csv("datasets/adult.zip")
     domain = Domain.fromdict(json.load(open("datasets/adult-domain.json", "r")))
     data = Dataset(df, domain)
-    synth = adagrid(data, 1.0, 1e-10, 5, targets=["income>50K"])  # , iters=250)
+    mbi_args = {"iters": 2500, "warm_start": True, "metric": "L2"}
+    synth = adagrid(
+        data,
+        1.0,
+        1e-10,
+        5,
+        split_strategy=[(0.45, 1e-10 / 3), (0.15, 1e-10 / 3), (0.4, 1e-10 / 3)],
+        targets=["income>50K"],
+        **mbi_args
+    )  # #
+    # ,
+    # iters=250)
 #    from IPython import embed; embed()
