@@ -239,7 +239,7 @@ def select(data, model, rho, targets=[]):
     return [e + tuple(targets) for e in T.edges]
 
 
-def adagrid(data, epsilon, delta, threshold, targets=[], split=None, **mbi_args):
+def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **mbi_args):
     """Implements the Adagrid mechanism used in Sprint 3 of NIST 2021
     Competition by Team Minutemen.
 
@@ -266,12 +266,12 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split=None, **mbi_args)
     if not split_strategy:
         rho_step_1 = rho_step_2 = rho_step_3 = rho / 3
     else:
-        eps, d = map(lambda i, j, k: i + j + k, *split)
+        eps, d = map(lambda i, j, k: i + j + k, *split_strategy)
         assert eps <= epsilon, "Requested epsilon exceeds budget"
         assert d <= delta, "Requested delta exceeds budget"
-        rho_step_1 = cdp_rho(*split[0])
-        rho_step_2 = cdp_rho(*split[1])
-        rho_step_3 = cdp_rho(*split[2])
+        rho_step_1 = cdp_rho(*split_strategy[0])
+        rho_step_2 = cdp_rho(*split_strategy[1])
+        rho_step_3 = cdp_rho(*split_strategy[2])
 
     domain = data.domain
     measurements = []
