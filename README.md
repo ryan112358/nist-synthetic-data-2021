@@ -1,9 +1,7 @@
 # nist-synthetic-data-2021
-Source code for the second place submission in the third round of the 2021 NIST differential privacy temporal map challenge
+Source code for the second place submission in the third round of the 2021 NIST differential privacy temporal map challenge.
 
-The contest-submission folder contains the code submitted during the contest, and only works on the contest dataset.  The files in this folder are sparsely commented.
-
-The extensions folder contains a new mechanism, inspired by the solution to the competition, that works on arbitrary discrete datasets.  
+The contest-submission folder contains the code submitted during the contest, and only works on the contest dataset.  The files in this folder are sparsely commented.  The extensions folder contains a new mechanism, inspired by the solution to the competition, that works on arbitrary discrete datasets.  Several benchmark datasets can be found in the extensions/datasets folder.
 
 ## Quick start
 
