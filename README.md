@@ -136,6 +136,7 @@ Average Error:  0.05595402713661589
 
 The error is calculated as an total variation distance between true and synthetic marginals, averaged over all 2-way marginals.  We can see both the breakdown (which marginals are estimated well and which are not), and the overall error.  We can also specify a list of targets, which modifies the evaluation criteria to include the target columns in all evalaution marginals.
 
+```
 $ python score.py --synthetic adult-synthetic-target.csv --targets "income>50K"
 relationship    sex             income>50K    0.005139
 marital-status  relationship    income>50K    0.011445
