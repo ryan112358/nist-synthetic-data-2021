@@ -64,7 +64,7 @@ age,workclass,fnlwgt,education-num,marital-status,occupation,relationship,race,s
 By default, this mechanism will try to preserve all 2-way marginals.  If one column has increased importance, we can specify that with the **targets** column.  With this option specified, we will instead try to preserve higher order marginals involving the targets.   If we specify ```--targets="income>50K"``` then the mechanism will try to preserve 3-way marginals involving the income column.  We can pass in multiple targets if desired, although scalability will suffer if the list is longer than a few columns. 
 
 ```
-$ python adaptive_grid.py --dataset datasets/adult.zip --domain datasets/adult-domain.json --targets="income>50K" --save adult-synthetic.csv
+$ python adaptive_grid.py --dataset datasets/adult.zip --domain datasets/adult-domain.json --targets="income>50K" --save adult-synthetic-target.csv
 
 Measuring ('income>50K',), L2 sensitivity 1.000000
 Measuring ('marital-status',), L2 sensitivity 1.000000
@@ -111,7 +111,49 @@ Measuring ('relationship', 'sex', 'income>50K'), L2 sensitivity 1.000000
 Post-processing with Private-PGM, will take some time...
 ```
 
-As we can see, the mechanism now measured a lot more things about marginals involving the target column.  In particular, it measured all 2-way marginals involving income, and  12 3-way marginals involving income.
+As we can see, the mechanism now measured a lot more things about marginals involving the target column.  In particular, it measured all 2-way marginals involving income, and 12 3-way marginals involving income.
+
+## Evaluating the synthetic data
+
+We can score our synthetic data using the score.py function, as follows:
+
+```
+$ python score.py --synthetic adult-synthetic.csv
+relationship    sex               0.003655
+                income>50K        0.003675
+marital-status  relationship      0.007279
+sex             income>50K        0.008364
+marital-status  income>50K        0.011373
+                                    ...   
+age             education-num     0.139112
+occupation      relationship      0.151089
+age             hours-per-week    0.157170
+occupation      sex               0.159074
+age             fnlwgt            0.207127
+Length: 91, dtype: float64
+Average Error:  0.05595402713661589
+```
+
+The error is calculated as an total variation distance between true and synthetic marginals, averaged over all 2-way marginals.  We can see both the breakdown (which marginals are estimated well and which are not), and the overall error.  We can also specify a list of targets, which modifies the evaluation criteria to include the target columns in all evalaution marginals.
+
+$ python score.py --synthetic adult-synthetic-target.csv --targets "income>50K"
+relationship    sex             income>50K    0.005139
+marital-status  relationship    income>50K    0.011445
+workclass       race            income>50K    0.024426
+sex             capital-loss    income>50K    0.027927
+marital-status  sex             income>50K    0.028029
+                                                ...   
+occupation      relationship    income>50K    0.140740
+age             education-num   income>50K    0.151325
+occupation      sex             income>50K    0.161418
+age             hours-per-week  income>50K    0.163691
+                fnlwgt          income>50K    0.174420
+Length: 78, dtype: float64
+Average Error:  0.06613134555274515
+```
+
+**NOTE**: By specifying targets in adaptive_grid.py, we can expect the synthetic data to score better when passing --targets to score.py.  If we score adult-synthetic.csv with the target option enabled, the score is 0.1038, almost 2X worse than the 0.0661 we achieved.
+
 
 ## Full configuration options
 
@@ -146,6 +188,24 @@ optional arguments:
   --split_strategy SPLIT_STRATEGY [SPLIT_STRATEGY ...]
                         budget split for 3 steps (default: [0.1, 0.1, 0.8])
   --save SAVE           path to save synthetic data (default: out.csv)
-```
 
+$ python score.py --help
+usage: score.py [-h] [--dataset DATASET] [--domain DOMAIN]
+                [--synthetic SYNTHETIC] [--targets TARGETS [TARGETS ...]]
+                [--save SAVE]
+
+A script to score the quality of synthetic data
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --dataset DATASET     dataset to use (default: datasets/adult.zip)
+  --domain DOMAIN       domain of dataset (default: datasets/adult-
+                        domain.json)
+  --synthetic SYNTHETIC
+                        synthetic dataset to use (default: out.csv)
+  --targets TARGETS [TARGETS ...]
+                        target columns to define evaluation criteria (default:
+                        [])
+  --save SAVE           path to save error report (default: error.csv)
+```
 

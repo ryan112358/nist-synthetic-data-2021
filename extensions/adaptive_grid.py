@@ -322,6 +322,7 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **
     # Step 2: select more marginals using an MST-style approach
     step2_queries = select(data, engine.model, rho_step_2, targets)
 
+    print()
     # step 3: measure those marginals
     step3_sigma = np.sqrt(len(step2_queries)) * np.sqrt(0.5 / rho_step_3)
     for cl in step2_queries:
@@ -349,6 +350,7 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **
 
         measurements.append((Q, y, 1.0, cl))
 
+    print()
     print("Post-processing with Private-PGM, will take some time...")
     model = engine.estimate(measurements)
     return model.synthetic_data()
@@ -396,8 +398,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # run doctests
-    import doctest
-    doctest.testmod()
+    #import doctest
+    #doctest.testmod()
 
     df = pd.read_csv(args.dataset)
     domain = Domain.fromdict(json.load(open(args.domain, "r")))
