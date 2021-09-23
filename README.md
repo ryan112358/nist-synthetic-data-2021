@@ -1,7 +1,7 @@
 # nist-synthetic-data-2021
 Source code for the second place submission in the third round of the 2021 NIST differential privacy temporal map challenge.
 
-The contest-submission folder contains the code submitted during the contest, and only works on the contest dataset.  The files in this folder are sparsely commented.  The extensions folder contains a new mechanism, inspired by the solution to the competition, that works on arbitrary discrete datasets.  Several benchmark datasets can be found in the extensions/datasets folder.
+The contest-submission folder contains the code submitted during the contest, and only works on the contest dataset.  A writeup about the solution can be found in this folder: [AdaptiveGrid.pdf](https://github.com/ryan112358/nist-synthetic-data-2021/blob/main/contest-submission/AdaptiveGrid.pdf).  The extensions folder contains a new mechanism, inspired by the solution to the competition, that works on arbitrary discrete datasets.  Several benchmark datasets can be found in the extensions/datasets folder.
 
 ## Quick start
 
@@ -155,10 +155,30 @@ Average Error:  0.06613134555274515
 
 **NOTE**: By specifying targets in adaptive_grid.py, we can expect the synthetic data to score better when passing --targets to score.py.  If we score adult-synthetic.csv with the target option enabled, the score is 0.1038, almost 2X worse than the 0.0661 we achieved.
 
+We can compare the score we obtain from our differentially private mechanism with that of a simple non-private baseline which samples n records with replacement from the original dataset.  We can run this baseline using resample.py and score it using the same score function.
+
+```
+$ python resample.py --dataset datasets/adult.csv --save resample.csv
+$ python score.py --synthetic resample.csv
+sex           income>50K        0.001679
+relationship  sex               0.002191
+race          income>50K        0.002211
+relationship  income>50K        0.002764
+capital-loss  income>50K        0.003030
+                                  ...   
+age           education-num     0.042545
+              occupation        0.046599
+fnlwgt        hours-per-week    0.048462
+age           hours-per-week    0.063142
+              fnlwgt            0.069919
+Length: 91, dtype: float64
+Average Error:  0.014676838660295519
+```
+
 
 ## Full configuration options
 
-The default configuration options are shown below.  The defaults should work fine in most cases.  Interested users can try modifying them if desired.
+The default configuration options are shown below.  In general, the dataset, domain, epsilon, delta, targets, and save options should be specified.  For other options, the defaults settings should work fine in most cases.  Interested users can try modifying them if desired.
 
 ```
 $ cd extensions/
@@ -210,3 +230,9 @@ optional arguments:
   --save SAVE           path to save error report (default: error.csv)
 ```
 
+Notes about other options:
+* The metric options corresponds to the loss function used to resolve inconsistencies in noisy marginals.  The L2 loss function is more natural with Gaussian noise, which is what we use, and also has better smoothness properties, making optimization simpler.  We don't recommend changing this, but feel free to try to see if it makes a difference in your use case.
+* The pgm_iters specifies how many iterations to run the proximal gradient algorithm underlying Private-PGM.  Increasing this value may improve error slightly, at the cost of increased runtime.  Decreasing this value too aggressively could destroy performance.
+* The warm_start option is activated during the second invocation of Private-PGM after step 3.  If it is turned on, then the parameters from in the previous invocation will be used to initialize the proximal algorithm.  
+* The threshold option is used to determine whether to measure a cell in a marginal at finer granularity.  If a cell in a marginal had noisy count below threshold\*sigma, then no future measurements will be made at finer granularity.  The mechanism seems fairly robust to the choice of threshold, and even setting it to -inf should be fine (no threshold).  Feel free to modify it and see how it impact performance on your problem, but expect the default to provide reasonable behavior.
+* the split_strategy option specifies how much of the privacy budget to devote to the three steps of the algorithm.  By default 10% is used on step 1 (measuring 1 way marginals), 10% is used on step 2 (selecting higher order marginals), and 80% is used on step 3 (measuring higher order marginals).  Since the first two steps are coarse-grained aggregations, they are more robust to noise than step 3.  Again, feel free to change this, but expect the default to work reasonably well.
