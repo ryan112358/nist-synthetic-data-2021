@@ -1,0 +1,267 @@
+{
+  "schema": {
+    "age": {
+      "dtype": "uint8",
+      "kind": "numeric",
+      "min": 17,
+      "max": 90,
+      "bins": 10
+    },
+    "workclass": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "?",
+        "Federal-gov",
+        "Local-gov",
+        "Never-worked",
+        "Private",
+        "Self-emp-inc",
+        "Self-emp-not-inc",
+        "State-gov",
+        "Without-pay"
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "fnlwgt": {
+      "dtype": "uint32",
+      "kind": "numeric",
+      "min": 12285,
+      "max": 1490400,
+      "bins": 10
+    },
+    "education": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "10th",
+        "11th",
+        "12th",
+        "1st-4th",
+        "5th-6th",
+        "7th-8th",
+        "9th",
+        "Assoc-acdm",
+        "Assoc-voc",
+        "Bachelors",
+        "Doctorate",
+        "HS-grad",
+        "Masters",
+        "Preschool",
+        "Prof-school",
+        "Some-college"
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "educational-num": {
+      "dtype": "uint8",
+      "kind": "categorical",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "marital-status": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "Divorced",
+        "Married-AF-spouse",
+        "Married-civ-spouse",
+        "Married-spouse-absent",
+        "Never-married",
+        "Separated",
+        "Widowed"
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "occupation": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "?",
+        "Adm-clerical",
+        "Armed-Forces",
+        "Craft-repair",
+        "Exec-managerial",
+        "Farming-fishing",
+        "Handlers-cleaners",
+        "Machine-op-inspct",
+        "Other-service",
+        "Priv-house-serv",
+        "Prof-specialty",
+        "Protective-serv",
+        "Sales",
+        "Tech-support",
+        "Transport-moving"
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "relationship": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "Husband",
+        "Not-in-family",
+        "Other-relative",
+        "Own-child",
+        "Unmarried",
+        "Wife"
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "race": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "Amer-Indian-Eskimo",
+        "Asian-Pac-Islander",
+        "Black",
+        "Other",
+        "White"
+      ],
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "gender": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "Female",
+        "Male"
+      ],
+      "codes": [
+        1,
+        2
+      ]
+    },
+    "capital-gain": {
+      "dtype": "uint32",
+      "kind": "numeric",
+      "min": 0,
+      "max": 99999,
+      "bins": 10
+    },
+    "capital-loss": {
+      "dtype": "uint16",
+      "kind": "numeric",
+      "min": 0,
+      "max": 4356,
+      "bins": 10
+    },
+    "hours-per-week": {
+      "dtype": "uint8",
+      "kind": "numeric",
+      "min": 1,
+      "max": 99,
+      "bins": 10
+    },
+    "income": {
+      "dtype": "str",
+      "kind": "categorical",
+      "values": [
+        "<=50K",
+        ">50K"
+      ],
+      "codes": [
+        1,
+        2
+      ]
+    }
+  }
+}

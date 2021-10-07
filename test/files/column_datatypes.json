@@ -1,0 +1,16 @@
+{
+  "dtype": {
+    "shift": "uint8",
+    "company_id": "uint8",
+    "pickup_community_area": "int8",
+    "dropoff_community_area": "int8",
+    "payment_type": "int8",
+    "trip_day_of_week": "uint8",
+    "trip_hour_of_day": "uint8",
+    "fare": "int16",
+    "tips": "int16",
+    "trip_total": "int16",
+    "trip_seconds": "int32",
+    "trip_miles": "int16"
+  }
+}
