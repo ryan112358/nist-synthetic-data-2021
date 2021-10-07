@@ -1,0 +1,52 @@
+{
+  "required": [ "schema" ],
+  "type": "object",
+  "properties" : {
+    "schema" : {
+      "type" : "object",
+      "patternProperties" : {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "dtype": { "enum": ["int8", "int16", "int32", "int64",
+                                "uint8", "uint16", "uint32", "uint64", 
+                                "str", "float", "date"]
+                     },
+            "kind": { "enum": ["categorical", "geographical",
+                               "numeric", "text", "date", "id"] },
+            "values": { "type": "array" },
+            "codes": { "type": "array", "items": { "type": "integer" } },
+            "min": { 
+              "anyOf": [
+                { "type": "number" },
+                { "type": "string", "format": "date" }
+              ]
+            },
+            "max": { 
+              "anyOf": [
+                { "type": "number" },
+                { "type": "string", "format": "date" }
+              ]
+            },
+            "bins": { "type": "number" }
+          },
+          "additionalProperties": false,
+          "required": ["dtype", "kind"],
+          "if": {
+            "properties": { "kind": { "enum": ["categorical", "geographical"] }}
+          },
+          "then": {
+            "required": [ "values", "codes" ]
+          },
+          "if": {
+            "properties": { "kind": { "enum": ["numeric", "date"] }}
+          },
+          "then": {
+            "required": [ "min", "max" ]
+          }
+        }  
+      }
+    }
+  }
+}
+

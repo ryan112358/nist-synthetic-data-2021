@@ -14,7 +14,6 @@ def downward_closure(cliques):
     return list(sorted(ans, key=len))
 
 def discretize(df, schema):
-
     new = df.copy()
     domain = { }
     for col in schema:
@@ -70,3 +69,30 @@ def undo_discretize(dataset, schema):
     dtypes = { col : schema[col]['dtype'] for col in schema }
 
     return new.astype(dtypes)
+
+if __name__ == "__main__":
+    formatter = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(description=description, formatter_class=formatter)
+
+    parser.add_argument('--transform', help='either discretize or undo_discretize')
+    parser.add_argument('--df', help='path to dataset')
+    parser.add_argument('--schema', help='path to schema file from schemagen')
+    parser.add_argument('--output', help='output path for transformed data')
+
+    parser.set_defaults(**default_params())
+    args = parser.parse_args()
+
+    transform = args.pop(['transform'])
+    output_path = args.pop(['output'])
+
+    assert transform in ['discretize', 'undo_discretize'], "transform name not \
+                                                                valid"
+
+    if transform == 'discretize':
+        transformed_df = discretize(**args)
+        pd.to_csv(output_path, transformed_df)
+
+    if transform == 'undo_discretize':
+        transformed_df = undo_discretize(**args)
+        pd.to_csv(output_path, transformed_df)
+
