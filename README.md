@@ -40,8 +40,40 @@ Here is a list of assumptions and limitations we are imposing:
 
 ## Preprocessing the Data
 
-If you would like to run our mechanism on your own dataset, this section shows you how to do that.  If you would like to run the emechanism on one of our datasets, feel free to skip to the next section.  As mentioned in the previous section, our mechanism expects the data for each column be come from the set {0, 1, ..., n_i}.  This section shows how to transform an arbitrary dataset into one of this form, and how to reverse this transformation as well.
+If you would like to run our mechanism on your own dataset, this section shows you how to do that.  If you would like to run the mechanism on one of our datasets, feel free to skip to the next section.  As mentioned in the previous section, our mechanism expects the data for each column be come from the set {0, 1, ..., n_i}.  This section shows how to transform an arbitrary dataset into one of this form, and how to reverse this transformation as well.
 
+Our script, `transform.py` can discretize and undiscretize your data. To use it, we first need to get the schema of the data using `schemagen`, you can get a copy of the script from `https://github.com/hd23408/nist-schemagen`. Once you have cloned the package, go to the folder and run:
+
+```
+python main.py datasets/raw/taxi.csv --num_bins 10 --skip_columns "taxi_id" --max_categorical 40
+```
+
+The README in `nist-schemagen` provides detailed descriptions of each argument. In the example above, we specify the path to the dataframe, the number of bins, the columns to be removed, and the maximum number of categorical features for any column. Users may want to play around with the flags of the script to see what works for their use case.
+
+By default, the script will place `parameters.json` and `column_datatypes.json` into the current directory. To discretize your data, run:
+
+```
+python transform.py --transform discretize --df taxi.csv --schema parameters.json --output discretized.csv
+```
+
+The arguments for `transform.py` are:
+
+```
+usage: transform.py [-h] --transform TRANSFORM --df DF --schema SCHEMA
+                    --output OUTPUT
+
+Pre and post processing functions for the Adagrid mechanism
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+required arguments:
+  --transform TRANSFORM
+                        either discretize or undo_discretize (default: None)
+  --df DF               path to dataset (default: None)
+  --schema SCHEMA       path to schema file from schemagen (default: None)
+  --output OUTPUT       output path for transformed data (default: None)
+```
 
 ## Running the Mechanism
 
@@ -97,6 +129,12 @@ age,workclass,fnlwgt,education-num,marital-status,occupation,relationship,race,s
 21,0,10,8,1,7,3,0,0,0,0,39,0,0
 31,8,12,6,0,14,2,0,1,0,0,34,0,1
 21,0,14,13,1,4,3,3,0,0,0,44,0,0
+```
+
+We can undo the discretization function we applied earlier:
+
+```
+python transform.py --transform undo_discretize --df adult-synthetic.csv --schema parameters.json --output adult-synthetic-raw.csv
 ```
 
 ## The target option
