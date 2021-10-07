@@ -8,6 +8,7 @@ import itertools
 import networkx as nx
 from disjoint_set import DisjointSet
 from cdp2adp import cdp_rho
+import argparse
 
 
 def powerset(iterable):
@@ -253,8 +254,8 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **
         targets (iterable, optional): List of target columns. Default is
             ``[]``.
         iters (int): Number of iterations for Mirror Descent algorithm to run.
-        split_strategy ([tuple]): List of tuples, each containing the
-            (`epsilon`,`delta`) allocated to each step of the algorithm.
+        split_strategy ([floats]): List of floats, each containing the
+            fraction of the zCDP budget allocated to each step of the algorithm.
         mbi_args (kwargs): Args to pass to mbi.FactoredInference. Please refer
             to the comments within this class to determine which parameters to pass.
 
@@ -266,12 +267,11 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **
     if not split_strategy:
         rho_step_1 = rho_step_2 = rho_step_3 = rho / 3
     else:
-        eps, d = map(lambda i, j, k: i + j + k, *split_strategy)
-        assert eps <= epsilon, "Requested epsilon exceeds budget"
-        assert d <= delta, "Requested delta exceeds budget"
-        rho_step_1 = cdp_rho(*split_strategy[0])
-        rho_step_2 = cdp_rho(*split_strategy[1])
-        rho_step_3 = cdp_rho(*split_strategy[2])
+        assert len(split_strategy) == 3
+        frac_1, frac_2, frac_3 = np.array(split_strategy) / sum(split_strategy)
+        rho_step_1 = rho*frac_1
+        rho_step_2 = rho*frac_2
+        rho_step_3 = rho*frac_3
 
     domain = data.domain
     measurements = []
@@ -316,12 +316,13 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **
             matrices[cl] = Q
             measurements.append((Q, y, 1.0, cl))
 
-    engine = FactoredInference(domain, log=True, **mbi_args)
+    engine = FactoredInference(domain, log=False, **mbi_args)
     engine.estimate(measurements)
 
     # Step 2: select more marginals using an MST-style approach
     step2_queries = select(data, engine.model, rho_step_2, targets)
 
+    print()
     # step 3: measure those marginals
     step3_sigma = np.sqrt(len(step2_queries)) * np.sqrt(0.5 / rho_step_3)
     for cl in step2_queries:
@@ -349,30 +350,69 @@ def adagrid(data, epsilon, delta, threshold, targets=[], split_strategy=None, **
 
         measurements.append((Q, y, 1.0, cl))
 
+    print()
     print("Post-processing with Private-PGM, will take some time...")
     model = engine.estimate(measurements)
     return model.synthetic_data()
 
 
+def default_params():
+    """
+    Return default parameters to run this program
+
+    :returns: a dictionary of default parameter settings for each command line argument
+    """
+    params = {}
+    params['dataset'] = 'datasets/adult.zip'
+    params['domain'] = 'datasets/adult-domain.json'
+    params['epsilon'] = 1.0
+    params['delta'] = 1e-10
+    params['targets'] = []
+    params['pgm_iters'] = 2500
+    params['warm_start'] = True
+    params['metric'] = 'L2'
+    params['threshold'] = 5.0
+    params['split_strategy'] = [0.1, 0.1, 0.8]
+    params['save'] = 'out.csv'
+
+    return params
+
 if __name__ == "__main__":
+
+    description = 'A generalization of the Adaptive Grid Mechanism that won 2nd place in the 2020 NIST temporal map challenge'
+    formatter = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(description=description, formatter_class=formatter)
+    parser.add_argument('--dataset', help='dataset to use')
+    parser.add_argument('--domain', help='dataset to use')
+    parser.add_argument('--epsilon', type=float, help='privacy  parameter')
+    parser.add_argument('--delta', type=float, help='privacy parameter')
+    parser.add_argument('--targets', type=str, nargs='+', help='target columns to preserve')
+    parser.add_argument('--pgm_iters', type=int, help='number of iterations')
+    parser.add_argument('--warm_start', type=bool, help='warm start PGM')
+    parser.add_argument('--metric', choices=['L1','L2'], help='loss function metric to use')
+    parser.add_argument('--threshold', type=float, help='adagrid treshold parameter')
+    parser.add_argument('--split_strategy', type=float, nargs='+', help='budget split for 3 steps')
+    parser.add_argument('--save', type=str, help='path to save synthetic data')
+
+    parser.set_defaults(**default_params())
+    args = parser.parse_args()
+
     # run doctests
-    import doctest
+    #import doctest
+    #doctest.testmod()
 
-    doctest.testmod()
-
-    df = pd.read_csv("datasets/adult.zip")
-    domain = Domain.fromdict(json.load(open("datasets/adult-domain.json", "r")))
+    df = pd.read_csv(args.dataset)
+    domain = Domain.fromdict(json.load(open(args.domain, "r")))
     data = Dataset(df, domain)
-    mbi_args = {"iters": 2500, "warm_start": True, "metric": "L2"}
+    mbi_args = {"iters": args.pgm_iters, "warm_start": args.warm_start, "metric": args.metric}
     synth = adagrid(
         data,
-        1.0,
-        1e-10,
-        5,
-        split_strategy=[(0.45, 1e-10 / 3), (0.15, 1e-10 / 3), (0.4, 1e-10 / 3)],
-        targets=["income>50K"],
+        args.epsilon,
+        args.delta,
+        args.threshold,
+        split_strategy=args.split_strategy,
+        targets=args.targets,
         **mbi_args
-    )  # #
-    # ,
-    # iters=250)
-#    from IPython import embed; embed()
+    )
+
+    synth.df.to_csv(args.save, index=False)
