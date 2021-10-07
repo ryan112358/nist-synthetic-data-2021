@@ -3,9 +3,36 @@ Source code for the second place submission in the third round of the 2021 NIST 
 
 The contest-submission folder contains the code submitted during the contest, and only works on the contest dataset.  A writeup about the solution can be found in this folder: [AdaptiveGrid.pdf](https://github.com/ryan112358/nist-synthetic-data-2021/blob/main/contest-submission/AdaptiveGrid.pdf).  The extensions folder contains a new mechanism, inspired by the solution to the competition, that works on arbitrary discrete datasets.  Several benchmark datasets can be found in the extensions/datasets folder.
 
+## Setting up
+
+The following setup instructions apply to Linux and OSX.  This code has not been tested on Windows, although it should run with a modified setup procedure.  
+First, make sure you have Python>=3.6 installed, and create a virtual environment as follows:
+
+```
+$ mkdir $HOME/venvs
+$ python3 -m venv pgm
+$ source ~/venvs/pgm/bin/activate
+$ pip install -r requirements.txt
+```
+
+This code depends on [Private-PGM](https://github.com/ryan112358/private-pgm).  Private-PGM can be set up using the following commands:
+```
+$ cd $HOME
+$ git clone git@github.com:ryan112358/private-pgm.git
+$ echo 'export PYTHONPATH="PYTHONPATH:$HOME/private-pgm/src/"' >> ~/.bashrc
+$ source ~/.bashrc
+$ cd private-pgm/test
+$ nosetests
+........................................
+----------------------------------------------------------------------
+Ran 40 tests in 5.009s
+
+OK
+```
+
 ## Quick start
 
-This code depends on [Private-PGM](https://github.com/ryan112358/private-pgm).  After setting up Private-PGM, we can generate  synthetic data using the following command
+After setting up Private-PGM, we can generate synthetic data using the following command
 
 ```
 $ cd extensions/
