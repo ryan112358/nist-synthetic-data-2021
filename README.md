@@ -30,7 +30,20 @@ Ran 40 tests in 5.009s
 OK
 ```
 
-## Quick start
+## Assumptions and Limitations
+
+Here is a list of assumptions and limitations we are imposing:
+
+* The input dataset must be discrete --- i.e., all columns must be categorical.  Numerical columns must be discretized into a small number of bins.  We expect the input dataset to be specified as a mbi.Dataset object (from Private-PGM). This object expects each attribute to take values from the set {0, 1, …, n_i}.  We include a collection of eight already preprocessed datasets alongside the released code in the extensions/datasets folder.  We also provide utilities for preprocessing arbitrary datasets into the required format, which we describe how to use in the next section.
+* We do not support “id” columns.  Other columns with high-cardinality domains should be discared.  The domain size for each column should be finite and reasonably small (definitely less than 1000, smaller than 100 preferred).  
+* Our mechanism satisfies unbounded differential privacy (add/remove one individual) and we assume a single individual only affects one row of the dataset.  If these assumptions are not satisfies, the privacy parameters must be modified accordingly.
+
+## Preprocessing the Data
+
+If you would like to run our mechanism on your own dataset, this section shows you how to do that.  If you would like to run the emechanism on one of our datasets, feel free to skip to the next section.  As mentioned in the previous section, our mechanism expects the data for each column be come from the set {0, 1, ..., n_i}.  This section shows how to transform an arbitrary dataset into one of this form, and how to reverse this transformation as well.
+
+
+## Running the Mechanism
 
 After setting up Private-PGM, we can generate synthetic data using the following command
 
