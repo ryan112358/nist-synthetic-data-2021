@@ -45,15 +45,15 @@ If you would like to run our mechanism on your own dataset, this section shows y
 Our script, `transform.py` can discretize and undiscretize your data. To use it, we first need to get the schema of the data using `schemagen`, you can get a copy of the script from `https://github.com/hd23408/nist-schemagen`. Once you have cloned the package, go to the folder and run:
 
 ```
-python main.py datasets/raw/taxi.csv --num_bins 10 --skip_columns "taxi_id" --max_categorical 40
+python schemagen.py datasets/raw/adult.csv --num_bins 10 --max_categorical 40
 ```
 
-The README in `nist-schemagen` provides detailed descriptions of each argument. In the example above, we specify the path to the dataframe, the number of bins, the columns to be removed, and the maximum number of categorical features for any column. Users may want to play around with the flags of the script to see what works for their use case.
+The README in `nist-schemagen` provides detailed descriptions of each argument. In the example above, we specify the path to the dataframe, the number of bins, and the maximum number of categorical features for any column. Users may want to play around with the flags of the script to see what works for their use case. Note that if the dataset contains an id column, you can use the `--skip_columns` flag and include any columns you don't want to be privatized making sure that they are seperated with commas.
 
 By default, the script will place `parameters.json` and `column_datatypes.json` into the current directory. To discretize your data, run:
 
 ```
-python transform.py --transform discretize --df taxi.csv --schema parameters.json --output discretized.csv
+python transform.py --transform discretize --df datasets/raw/adult.csv --schema parameters.json --output discretized.csv
 ```
 
 The arguments for `transform.py` are:
@@ -310,7 +310,7 @@ optional arguments:
 
 Notes about other options:
 * The metric options corresponds to the loss function used to resolve inconsistencies in noisy marginals.  The L2 loss function is more natural with Gaussian noise, which is what we use, and also has better smoothness properties, making optimization simpler.  We don't recommend changing this, but feel free to try to see if it makes a difference in your use case.
-* The pgm_iters specifies how many iterations to run the proximal gradient algorithm underlying Private-PGM.  Increasing this value may improve error slightly, at the cost of increased runtime.  Decreasing this value too aggressively could destroy performance.
+* The `pgm_iters` specifies how many iterations to run the proximal gradient algorithm underlying Private-PGM.  Increasing this value may improve error slightly, at the cost of increased runtime.  Decreasing this value too aggressively could destroy performance.
 * The warm_start option is activated during the second invocation of Private-PGM after step 3.  If it is turned on, then the parameters from in the previous invocation will be used to initialize the proximal algorithm.  
 * The threshold option is used to determine whether to measure a cell in a marginal at finer granularity.  If a cell in a marginal had noisy count below threshold\*sigma, then no future measurements will be made at finer granularity.  The mechanism seems fairly robust to the choice of threshold, and even setting it to -inf should be fine (no threshold).  Feel free to modify it and see how it impact performance on your problem, but expect the default to provide reasonable behavior.
 * the split_strategy option specifies how much of the privacy budget to devote to the three steps of the algorithm.  By default 10% is used on step 1 (measuring 1 way marginals), 10% is used on step 2 (selecting higher order marginals), and 80% is used on step 3 (measuring higher order marginals).  Since the first two steps are coarse-grained aggregations, they are more robust to noise than step 3.  Again, feel free to change this, but expect the default to work reasonably well.
