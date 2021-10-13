@@ -383,8 +383,8 @@ if __name__ == "__main__":
     formatter = argparse.ArgumentDefaultsHelpFormatter
     parser = argparse.ArgumentParser(description=description, formatter_class=formatter)
     parser.add_argument('--dataset', help='dataset to use')
-    parser.add_argument('--domain', help='dataset to use')
-    parser.add_argument('--epsilon', type=float, help='privacy  parameter')
+    parser.add_argument('--domain', help='domain to use')
+    parser.add_argument('--epsilon', type=float, help='privacy parameter')
     parser.add_argument('--delta', type=float, help='privacy parameter')
     parser.add_argument('--targets', type=str, nargs='+', help='target columns to preserve')
     parser.add_argument('--pgm_iters', type=int, help='number of iterations')

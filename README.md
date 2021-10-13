@@ -52,29 +52,37 @@ The README in [here](https://github.com/hd23408/nist-schemagen) provides detaile
 
 By default, the script will place `parameters.json` and `column_datatypes.json` into the current directory. If you want to specify a different output directory, use the `--output_dir` argument. Additionally, for `numeric` column types, the default number of bins is 10. If you want custom binning, it is straighforward to open the `parameters.json` file in your favorite text editor and edit the `bins` field for each column.
 
-To discretize your data and place the result into a file name `discretized.csv`, run:
+To discretize your data and place the result into a folder `PATH_TO_OUTPUT`,
+run:
 
 ```
-python transform.py --transform discretize --df /path_to_repo/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv --schema parameters.json --output discretized.csv
+python transform.py --transform discretize --df
+PATH_TO_REPO/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv
+--schema parameters.json --output_dir PATH_TO_OUTPUT
 ```
+
+Note that if you use `--transform discretize`, the script will also write a
+`domain.json` file to `OUTPUT_DIR`. This file will be necessary to run PGM.
 
 The arguments for `transform.py` are:
 
 ```
-usage: transform.py [-h] --transform TRANSFORM --df DF --schema SCHEMA
-                    --output OUTPUT
+usage: transform.py [-h] [--output_dir OUTPUT_DIR] --transform TRANSFORM --df
+                    DF --schema SCHEMA
 
 Pre and post processing functions for the Adagrid mechanism
 
 optional arguments:
   -h, --help            show this help message and exit
+  --output_dir OUTPUT_DIR
+                        output directory for transformed data and domain if
+                        using `discretize` (default: .)
 
 required arguments:
   --transform TRANSFORM
                         either discretize or undo_discretize (default: None)
   --df DF               path to dataset (default: None)
   --schema SCHEMA       path to schema file from schemagen (default: None)
-  --output OUTPUT       output path for transformed data (default: None)
 ```
 
 And that's all there is to it!
@@ -138,7 +146,8 @@ age,workclass,fnlwgt,education-num,marital-status,occupation,relationship,race,s
 We can undo the discretization function we applied earlier:
 
 ```
-python transform.py --transform undo_discretize --df adult-synthetic.csv --schema parameters.json --output adult-synthetic-raw.csv
+python transform.py --transform undo_discretize --df adult-synthetic.csv
+--schema parameters.json --output_dir .
 ```
 
 ## The target option

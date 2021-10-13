@@ -26,9 +26,7 @@ def discretize(df, schema):
         else:
             new[col] = df[col] - info['min']
             domain[col] = info['max'] - info['min'] + 1
-
-    domain = Domain.fromdict(domain)
-    return Dataset(new, domain, None).df, domain
+    return new, domain
 
 def undo_discretize(df, schema):
     new = df.copy()
@@ -62,6 +60,13 @@ if __name__ == "__main__":
     formatter = argparse.ArgumentDefaultsHelpFormatter
 
     parser = argparse.ArgumentParser(description=description, formatter_class=formatter)
+
+    parser.add_argument('--output_dir', help='output directory for \
+                            transformed data and domain if using `discretize`',
+                           required=False)
+
+    parser.set_defaults(**{'output_dir': '.'})
+
     required = parser.add_argument_group('required arguments')
 
 
@@ -70,14 +75,11 @@ if __name__ == "__main__":
     required.add_argument('--df', help='path to dataset', required=True)
     required.add_argument('--schema', help='path to schema file from schemagen',
                             required=True)
-    required.add_argument('--output', help='output path for transformed data',
-                            required=True)
 
-    #parser.set_defaults(**default_params)
     args = parser.parse_args()
 
     transform = args.transform
-    output_path = args.output
+    output_dir = args.output_dir
     df = pd.read_csv(args.df)
     with open(args.schema) as f:
         schemagen = json.load(f)
@@ -86,10 +88,14 @@ if __name__ == "__main__":
     assert transform in ['discretize', 'undo_discretize'], "transform name not \
                                                                 valid"
     if transform == 'discretize':
-        transformed_df, _ = discretize(df=df, schema=schema)
+        transformed_df, domain = discretize(df=df, schema=schema)
+        with open(output_dir + '/domain.json', "w") as f:
+            json.dump(domain, fp=f)
+
+        transformed_df.to_csv(output_dir + '/discretized.csv', index=False)
 
     if transform == 'undo_discretize':
         transformed_df = undo_discretize(df=df, schema=schema)
+        transformed_df.to_csv(output_dir + '/raw_synthetic.csv', index=False)
 
-    transformed_df.to_csv(output_path, index=False)
 
