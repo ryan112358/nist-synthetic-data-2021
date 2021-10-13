@@ -42,18 +42,20 @@ Here is a list of assumptions and limitations we are imposing:
 
 If you would like to run our mechanism on your own dataset, this section shows you how to do that.  If you would like to run the mechanism on one of our datasets, feel free to skip to the next section.  As mentioned in the previous section, our mechanism expects the data for each column be come from the set {0, 1, ..., n_i}.  This section shows how to transform an arbitrary dataset into one of this form, and how to reverse this transformation as well.
 
-Our script, `transform.py` can discretize and undiscretize your data. To use it, we first need to get the schema of the data using `schemagen`, you can get a copy of the script from `https://github.com/hd23408/nist-schemagen`. Once you have cloned the package, go to the folder and run:
+Our script, `transform.py` can discretize and undiscretize your data. To use it, we first need to get the schema of the data using `schemagen`. Schemagen was written by Maia Hansen and the original repo can be accessed [here](https://github.com/hd23408/nist-schemagen). For convenience, we have included a copy of the script in our repo. It is located in `extensions/schemagen.py`. We have also provided a copy of the undiscretized version of the adult dataset so that users can test the script first before using it on their own dataset. To run schemagen on the adult dataset, use this command:
 
 ```
-python schemagen.py datasets/raw/adult.csv --num_bins 10 --max_categorical 40
+python schemagen.py /path_to_repo/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv --max_categorical 40
 ```
 
-The README in `nist-schemagen` provides detailed descriptions of each argument. In the example above, we specify the path to the dataframe, the number of bins, and the maximum number of categorical features for any column. Users may want to play around with the flags of the script to see what works for their use case. Note that if the dataset contains an id column, you can use the `--skip_columns` flag and include any columns you don't want to be privatized making sure that they are seperated with commas.
+The README in [here](https://github.com/hd23408/nist-schemagen) provides detailed descriptions of each argument. In the example above, we specify the path to the dataframe and the maximum number of categorical features for any column. Users may want to play around with the flags of the script to see what works for their use case. Note that if the dataset contains an id column, you can use the `--skip_columns` argument and include any columns you don't want to be privatized making sure that they are seperated with commas. 
 
-By default, the script will place `parameters.json` and `column_datatypes.json` into the current directory. To discretize your data, run:
+By default, the script will place `parameters.json` and `column_datatypes.json` into the current directory. If you want to specify a different output directory, use the `--output_dir` argument. Additionally, for `numeric` column types, the default number of bins is 10. If you want custom binning, it is straighforward to open the `parameters.json` file in your favorite text editor and edit the `bins` field for each column.
+
+To discretize your data and place the result into a file name `discretized.csv`, run:
 
 ```
-python transform.py --transform discretize --df datasets/raw/adult.csv --schema parameters.json --output discretized.csv
+python transform.py --transform discretize --df /path_to_repo/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv --schema parameters.json --output discretized.csv
 ```
 
 The arguments for `transform.py` are:
@@ -74,6 +76,8 @@ required arguments:
   --schema SCHEMA       path to schema file from schemagen (default: None)
   --output OUTPUT       output path for transformed data (default: None)
 ```
+
+And that's all there is to it!
 
 ## Running the Mechanism
 
@@ -115,7 +119,7 @@ Measuring ('relationship', 'income>50K'), L2 sensitivity 1.000000
 Post-processing with Private-PGM, will take some time...
 ```
 
-As we can see, the mechanism measured queries about all 1-way marginal, and a subset of 13 2-way marginals.  This produces an output adult-synthetic.csv that we can radily view
+As we can see, the mechanism measured queries about all 1-way marginals, and a subset of 13 2-way marginals.  This produces an output adult-synthetic.csv that we can radily view
 
 ```
 $ head adult-synthetic.csv
