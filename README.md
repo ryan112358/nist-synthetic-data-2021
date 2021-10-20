@@ -5,15 +5,8 @@ The contest-submission folder contains the code submitted during the contest, an
 
 ## Setting up
 
-The following setup instructions apply to Linux and OSX.  This code has not been tested on Windows, although it should run with a modified setup procedure.  
-First, make sure you have Python>=3.6 installed, and create a virtual environment as follows:
 
-```
-$ mkdir $HOME/venvs
-$ python3 -m venv pgm
-$ source ~/venvs/pgm/bin/activate
-$ pip install -r requirements.txt
-```
+The following setup instructions apply to Linux and OSX.  This code has not been tested on Windows, although it should run with a modified setup procedure.
 
 This code depends on [Private-PGM](https://github.com/ryan112358/private-pgm).  Private-PGM can be set up using the following commands:
 ```
@@ -24,6 +17,19 @@ $ source ~/.bashrc
 $ cd private-pgm/test
 $ nosetests
 ........................................
+
+Now, make sure you have Python>=3.6 installed, and create a virtual environment as follows:
+
+```
+$ mkdir $HOME/venvs
+$ python3 -m venv pgm
+$ source ~/venvs/pgm/bin/activate
+$ pip install -r requirements.txt
+```
+
+Note that `requirements.txt` is located in the private-pgm repository.
+
+
 ----------------------------------------------------------------------
 Ran 40 tests in 5.009s
 
