@@ -14,12 +14,9 @@ $ cd $HOME
 $ git clone git@github.com:ryan112358/private-pgm.git
 $ echo 'export PYTHONPATH="PYTHONPATH:$HOME/private-pgm/src/"' >> ~/.bashrc
 $ source ~/.bashrc
-$ cd private-pgm/test
-$ nosetests
-........................................
 ```
 
-Now, make sure you have Python>=3.6 installed, and create a virtual environment as follows:
+Make sure you have Python>=3.6 installed, and create a virtual environment as shown below. Note that `requirements.txt` is located in the private-pgm repository.
 
 ```
 $ mkdir $HOME/venvs
@@ -28,8 +25,12 @@ $ source ~/venvs/pgm/bin/activate
 $ pip install -r requirements.txt
 ```
 
-Note that `requirements.txt` is located in the private-pgm repository.
+Now, run the unittests for Private-PGM to confirm that everything is working properly:
 
+```
+$ cd private-pgm/test
+$ nosetests
+........................................
 ----------------------------------------------------------------------
 Ran 40 tests in 5.009s
 
