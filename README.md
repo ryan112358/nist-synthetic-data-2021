@@ -16,7 +16,7 @@ $ echo 'export PYTHONPATH="PYTHONPATH:$HOME/private-pgm/src/"' >> ~/.bashrc
 $ source ~/.bashrc
 ```
 
-Make sure you have Python>=3.6 installed, and create a virtual environment as shown below. Note that `requirements.txt` is located in the private-pgm repository.
+Make sure you have Python>=3.6 installed, and create a virtual environment as shown below:
 
 ```
 $ mkdir $HOME/venvs
