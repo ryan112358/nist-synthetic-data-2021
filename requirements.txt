@@ -5,3 +5,4 @@ networkx
 matplotlib
 nose
 disjoint-set
+PyQt5
