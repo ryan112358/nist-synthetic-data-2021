@@ -20,7 +20,7 @@ Make sure you have Python>=3.6 installed, and create a virtual environment as sh
 
 ```
 $ mkdir $HOME/venvs
-$ python3 -m venv pgm
+$ python3 -m venv $HOME/venvs/pgm
 $ source ~/venvs/pgm/bin/activate
 $ pip install -r requirements.txt
 ```
