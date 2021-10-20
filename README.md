@@ -17,6 +17,7 @@ $ source ~/.bashrc
 $ cd private-pgm/test
 $ nosetests
 ........................................
+```
 
 Now, make sure you have Python>=3.6 installed, and create a virtual environment as follows:
 
@@ -28,7 +29,6 @@ $ pip install -r requirements.txt
 ```
 
 Note that `requirements.txt` is located in the private-pgm repository.
-
 
 ----------------------------------------------------------------------
 Ran 40 tests in 5.009s
