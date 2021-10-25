@@ -1,6 +1,4 @@
-# nist-synthetic-data-2021
-Source code for the second place submission in the third round of the 2021 NIST differential privacy temporal map challenge.
-
+# nist-synthetic-data-2021 Source code for the second place submission in the third round of the 2021 NIST differential privacy temporal map challenge.  
 The contest-submission folder contains the code submitted during the contest, and only works on the contest dataset.  A writeup about the solution can be found in this folder: [AdaptiveGrid.pdf](https://github.com/ryan112358/nist-synthetic-data-2021/blob/main/contest-submission/AdaptiveGrid.pdf).  The extensions folder contains a new mechanism, inspired by the solution to the competition, that works on arbitrary discrete datasets.  Several benchmark datasets can be found in the extensions/datasets folder.
 
 ## Setting up
@@ -52,7 +50,8 @@ If you would like to run our mechanism on your own dataset, this section shows y
 Our script, `transform.py` can discretize and undiscretize your data. To use it, we first need to get the schema of the data using `schemagen`. Schemagen was written by Maia Hansen and the original repo can be accessed [here](https://github.com/hd23408/nist-schemagen). For convenience, we have included a copy of the script in our repo. It is located in `extensions/schemagen.py`. We have also provided a copy of the undiscretized version of the adult dataset so that users can test the script first before using it on their own dataset. To run schemagen on the adult dataset, use this command:
 
 ```
-python schemagen.py /path_to_repo/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv --max_categorical 40
+$ cd extensions/
+$ python schemagen.py /path_to_repo/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv --max_categorical 40
 ```
 
 The README in [here](https://github.com/hd23408/nist-schemagen) provides detailed descriptions of each argument. In the example above, we specify the path to the dataframe and the maximum number of categorical features for any column. Users may want to play around with the flags of the script to see what works for their use case. Note that if the dataset contains an id column, you can use the `--skip_columns` argument and include any columns you don't want to be privatized making sure that they are seperated with commas. 
@@ -63,7 +62,7 @@ To discretize your data and place the result into a folder `PATH_TO_OUTPUT`,
 run:
 
 ```
-python transform.py --transform discretize --df
+$ python transform.py --transform discretize --df
 PATH_TO_REPO/nist_synthetic-data-2021/extensions/datasets/raw/adult.csv
 --schema parameters.json --output_dir PATH_TO_OUTPUT
 ```
@@ -90,6 +89,13 @@ required arguments:
                         either discretize or undo_discretize (default: None)
   --df DF               path to dataset (default: None)
   --schema SCHEMA       path to schema file from schemagen (default: None)
+```
+
+Finally, we can check to make sure the final dataset and domain file adhere to the format required by our mechanism.
+
+```
+$ python check_domain.py --dataset PATH_TO_TRANSFORMED_CSV --domain PATH_TO_TRANSFORMED_DOMAIN
+Dataset and domain file look good!
 ```
 
 And that's all there is to it!
