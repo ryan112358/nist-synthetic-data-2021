@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+title: Adaptive Granularity Mechanism
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ryan
+    family-names: McKenna
+    email: rmckenna@cs.umass.edu
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: University of Massachusettes Amherst
+  - given-names: Joie 
+    family-names: Wu
+    email: yeahuaywu@cs.umass.edu
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: University of Massachusettes Amherst
+  - given-names: Arisa 
+    family-names: Tajima
+    email: atajima@cs.umass.edu
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: University of Massachusettes Amherst
+  - given-names: Brett 
+    family-names: Mullins
+    email: bmullins@cs.umass.edu
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: University of Massachusettes Amherst
+  - given-names: Cecilia 
+    family-names: Ferrando
+    email: cferrando@cs.umass.edu
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: University of Massachusettes Amherst
+  - given-names: Siddhant 
+    family-names: Pradhan
+    email: sspradhan@umass.edu
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: University of Massachusettes Amherst
+url: "https://github.com/ryan112358/nist-synthetic-data-2021"
+version:
+date-released: 2021-10-25
